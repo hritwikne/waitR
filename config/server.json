@@ -1,0 +1,20 @@
+{
+  "listen_address": "0.0.0.0:8080",
+  "static_path": "./public",
+  "proxy_routes": [
+    {
+      "prefix": "/api/",
+      "backends": [
+        "http://localhost:9000",
+        "http://localhost:9001"
+      ]
+    },
+    {
+      "prefix": "/auth/",
+      "backends": [
+        "http://localhost:6000",
+        "http://localhost:6001"
+      ]
+    }
+  ]
+}

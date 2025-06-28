@@ -1,0 +1,9 @@
+{
+  "level": "debug",
+  "mode": "dev",
+  "log_file": "./logs/app.log",
+  "max_size": 10,
+  "max_age": 7,
+  "max_backups": 5,
+  "compress": true
+}
