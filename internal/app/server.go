@@ -2,21 +2,41 @@ package app
 
 import (
 	"net/http"
+	"time"
 
 	"go.uber.org/zap"
 )
 
-func Start(ctx *AppContext) {
+func StartHTTPServer(ctx *AppContext) {
 	log := ctx.Logger()
-	address := ctx.GetConfig().ListenAddress
+	config := ctx.GetConfig()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Info("Received GET / request")
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Info(
+			"Received request",
+			zap.String("method", r.Method), zap.String("url", r.URL.String()),
+		)
+		w.Write([]byte("Hello from WaitR"))
 	})
 
-	log.Info("Starting WaitR server", zap.String("address", address))
-	if err := http.ListenAndServe(address, nil); err != nil {
-		log.Fatal("Failed to start WaitR server", zap.Error(err))
+	address := config.ListenAddress
+	srv := &http.Server{
+		Addr:              address,
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
+	ctx.httpServer = srv
+
+	go func() {
+		log.Info("Starting WaitR server", zap.String("address", address))
+		// Ignore http.ErrServerClosed error since it is returned on graceful shutdown
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal("Server error", zap.Error(err))
+		}
+	}()
 }

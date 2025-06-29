@@ -1,13 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"waitr/internal/app"
 )
 
 func main() {
-	config, err := app.LoadConfig()
+	pathToConfig := "config/server.json"
+	config, err := app.LoadConfig(pathToConfig)
 	if err != nil {
 		panic("Failed to load server configuration: " + err.Error())
+	}
+
+	if err := app.ValidateConfig(config); err != nil {
+		panic(fmt.Errorf("invalid server configuration: %w", err))
 	}
 
 	logger, err := app.SetupLogging()
@@ -15,11 +21,14 @@ func main() {
 		panic("Cannot create logger: " + err.Error())
 	}
 	defer logger.Sync()
+	logger.Info("Config file succesfully loaded and parsed")
 
+	// central store init
 	ctx := app.NewAppContext(config, logger)
 
-	log := ctx.Logger()
-	log.Info("Config file succesfully loaded and parsed")
+	// goroutines
+	app.StartHTTPServer(ctx)
+	go app.WatchConfigFile(ctx, pathToConfig)
 
-	app.Start(ctx)
+	app.HandleShutdown(ctx) // waiting for signal
 }

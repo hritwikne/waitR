@@ -1,6 +1,13 @@
 {
-  "listen_address": "0.0.0.0:8080",
+  "listen_address": "0.0.0.0:8090",
   "static_path": "./public",
+  "root_file": "index.html",
+  "timeouts": {
+    "read_header_timeout_ms": 5000,
+    "read_timeout_ms": 10000,
+    "write_timeout_ms": 15000,
+    "idle_timeout_ms": 60000
+  },
   "proxy_routes": [
     {
       "prefix": "/api/",
