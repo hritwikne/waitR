@@ -21,13 +21,15 @@ func StartHTTPServer(ctx *AppContext) {
 	})
 
 	address := config.ListenAddress
+	timeouts := config.Timeouts
+
 	srv := &http.Server{
 		Addr:              address,
 		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       10 * time.Second,
-		WriteTimeout:      15 * time.Second,
-		IdleTimeout:       60 * time.Second,
+		ReadHeaderTimeout: time.Duration(timeouts.ReadHeaderTimeout) * time.Millisecond,
+		ReadTimeout:       time.Duration(timeouts.ReadTimeout) * time.Millisecond,
+		WriteTimeout:      time.Duration(timeouts.WriteTimeout) * time.Millisecond,
+		IdleTimeout:       time.Duration(timeouts.IdleTimeout) * time.Millisecond,
 	}
 
 	ctx.httpServer = srv
