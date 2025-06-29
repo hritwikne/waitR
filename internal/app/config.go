@@ -72,7 +72,7 @@ func validateListenAddress(addr string) error {
 func validateStaticPath(staticPath, rootFile string) error {
 	trimmed := strings.TrimSpace(staticPath)
 	if trimmed == "" {
-		return fmt.Errorf("static_path is required and cannot be blank")
+		return nil // no need to validate if not provided
 	}
 
 	info, err := os.Stat(trimmed)
